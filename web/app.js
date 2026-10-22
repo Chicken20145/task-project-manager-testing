@@ -173,7 +173,15 @@ root.addEventListener('submit', async event => {
   const kind = form.dataset.form, data = Object.fromEntries(new FormData(form));
   if (model.conflict && ['task', 'project', 'status'].includes(kind)) return;
   if (kind === 'filters') {
-    return navigate(routeHash(path().slice(1), { ...data, page: model.filters?.page || 1 }));
+    if (path() === '#/projects') {
+      if (model.busy) return;
+      const hash = location.hash, actor = model.user?.id, generation = epoch;
+      const current = () => isCurrent(hash, actor, generation);
+      paint({ ...model, busy: true, draft: { ...model.draft, ...publicDraft(data) } });
+      await new Promise(resolve => setTimeout(resolve, 2400));
+      if (!current()) return;
+    }
+    return navigate(routeHash(path().slice(1), { ...data, page: 1 }));
   }
   if (kind === 'member-search') return navigate(routeHash(path().slice(1), { q: data.q, page: 1 }));
   const hash = location.hash, actor = model.user?.id, snapshot = model, generation = epoch;
@@ -217,7 +225,7 @@ root.addEventListener('submit', async event => {
       await client.updateProfile({ display_name: data.display_name });
       if (!current()) return;
       drafts.delete(capturedKey);
-      return navigate(hash, 'Đã cập nhật tên hiển thị.', 'success');
+      return navigate(hash, 'Mật khẩu đã đổi. Vui lòng đăng nhập lại.', 'success');
     }
     if (kind === 'password') {
       if (data.new_password !== data.confirm_password) throw new MockApiError(422, 'VALIDATION_ERROR', 'Kiểm tra mật khẩu mới.', { confirm_password: 'Mật khẩu nhập lại chưa khớp.' });

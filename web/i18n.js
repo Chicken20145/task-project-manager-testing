@@ -277,6 +277,11 @@ export function normalizeLanguage(value) {
 }
 
 export function loadLanguage(storage) {
+  try {
+    if (storage && typeof storage.getItem === 'function') {
+      return normalizeLanguage(storage.getItem('task-manager.language'));
+    }
+  } catch {}
   return 'vi';
 }
 

@@ -1,5 +1,11 @@
 """Same-origin browser boundary, bounded JSON bodies, and response headers."""
+import asyncio
 import json
+from urllib.parse import urlsplit
+
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+BODY_TIMEOUT_SECONDS = 10
 
 
 SECURITY_HEADERS = {
@@ -12,6 +18,9 @@ SECURITY_HEADERS = {
 class BrowserBoundary:
     def __init__(self, app, settings):
         self.app, self.settings = app, settings
+        if settings.environment == 'production':
+            self.app = TrustedHostMiddleware(app, allowed_hosts=[urlsplit(settings.public_origin).hostname],
+                                             www_redirect=False)
 
     async def __call__(self, scope, receive, send):
         if scope['type'] != 'http':
@@ -44,15 +53,21 @@ class BrowserBoundary:
             if not no_body and headers.get('content-type', '').split(';')[0].strip().lower() != 'application/json':
                 return await reject(415, 'UNSUPPORTED_MEDIA_TYPE', 'Yêu cầu cần dữ liệu JSON.')
             body = bytearray()
-            while True:
-                message = await receive()
-                if message['type'] == 'http.disconnect':
-                    return
-                body.extend(message.get('body', b''))
-                if len(body) > 16 * 1024:
-                    return await reject(413, 'BODY_TOO_LARGE', 'Dữ liệu gửi lên vượt giới hạn 16 KiB.')
-                if not message.get('more_body', False):
-                    break
+            try:
+                async with asyncio.timeout(BODY_TIMEOUT_SECONDS):
+                    while True:
+                        message = await receive()
+                        if message['type'] == 'http.disconnect':
+                            return
+                        body.extend(message.get('body', b''))
+                        if len(body) > 16 * 1024:
+                            break
+                        if not message.get('more_body', False):
+                            break
+            except TimeoutError:
+                return await reject(408, 'BODY_TIMEOUT', 'Quá thời gian nhận dữ liệu. Hãy thử lại.')
+            if len(body) > 16 * 1024:
+                return await reject(413, 'BODY_TOO_LARGE', 'Dữ liệu gửi lên vượt giới hạn 16 KiB.')
             delivered = False
 
             async def replay():

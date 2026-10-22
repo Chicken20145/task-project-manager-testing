@@ -64,7 +64,7 @@ export function renderNotifications(model = {}, translator = { text: s => s || '
   // Month navigation
   const prevMonthUrl = cal.previous_month ? buildUrl({ month: cal.previous_month, date: `${cal.previous_month}-01`, page: feedPage }) : null;
   const nextMonthUrl = cal.next_month ? buildUrl({ month: cal.next_month, date: `${cal.next_month}-01`, page: feedPage }) : null;
-  const todayUrl = today ? buildUrl({ month: today.slice(0, 7), date: today, page: 1 }) : null;
+  const todayUrl = today ? buildUrl({ month: today.slice(0, 7), date: today, page: feedPage }) : null;
 
   const weekdays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 

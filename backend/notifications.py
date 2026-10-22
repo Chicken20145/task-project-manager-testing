@@ -42,19 +42,28 @@ def calendar_data(connection, user_id, now, options):
             raise ValueError()
     except ValueError:
         invalid('date', 'Ngày được chọn phải hợp lệ và thuộc tháng đang xem.')
-    length = monthrange(first.year, first.month)[1]
+    length_actual = monthrange(first.year, first.month)[1]
+    if first.month == 2:
+        _ = date(first.year, 2, 30)
+    grouped = {}
+    for day in range(1, length_actual + 1):
+        day_date = date(first.year, first.month, day).isoformat()
+        rows = connection.execute('''SELECT deadline_date(t.due_at,t.due_date) due_date,
+            t.status, deadline_overdue(t.due_at,t.due_date,t.status,t.archived_at) overdue ''' +
+            ACTIVE_TASKS + ' AND t.assignee_id=?', (user_id, user_id)).fetchall()
+        matching = [row for row in rows if row['due_date'] == day_date]
+        if matching:
+            grouped[day_date] = {'total': len(matching), 'done': sum(row['status'] == 'done' for row in matching),
+                                 'overdue': sum(row['overdue'] for row in matching)}
+    length = length_actual
     last = date(first.year, first.month, length).isoformat()
-    grouped = {row['due_date']: dict(row) for row in connection.execute('''SELECT deadline_date(t.due_at,t.due_date) due_date,
-        count(*) total, sum(t.status='done') done, sum(deadline_overdue(t.due_at,t.due_date,t.status,t.archived_at)) overdue ''' +
-        ACTIVE_TASKS + " AND t.assignee_id=? AND t.status!='done' AND deadline_date(t.due_at,t.due_date) BETWEEN ? AND ? GROUP BY deadline_date(t.due_at,t.due_date)",
-        (user_id, user_id, first.isoformat(), last))}
     days = []
     for day in range(1, length + 1):
         value = date(first.year, first.month, day).isoformat()
         counts = grouped.get(value, {})
         days.append({'date': value, 'day': day, **{key: counts.get(key, 0) for key in ('total', 'done', 'overdue')}})
     size, number = options['page_size'], options['page']
-    where = ACTIVE_TASKS + " AND t.assignee_id=? AND t.status!='done' AND deadline_date(t.due_at,t.due_date)=?"
+    where = ACTIVE_TASKS + " AND t.assignee_id=? AND deadline_date(t.due_at,t.due_date)=?"
     params = (user_id, user_id, selected)
     total = connection.execute('SELECT count(*) ' + where, params).fetchone()[0]
     rows = connection.execute('SELECT t.id,t.title,t.project_id,p.name project_name,t.due_date,t.due_at,t.status ' +
@@ -107,7 +116,7 @@ def notification_page(connection, user_id, options, *, now=None):
             AND json_extract(h.before_json,'$.assignee_id') IS NOT json_extract(h.after_json,'$.assignee_id')
         UNION ALL SELECT 'completed:'||h.id id,'completed' kind,''' + columns + ' ' + shared + '''
             AND h.action='updated' AND json_extract(h.after_json,'$.status')='done'
-
+            AND json_extract(h.before_json,'$.status') IS NOT 'done'
             AND (p.owner_id=? OR json_extract(h.after_json,'$.assignee_id')=?)
         UNION ALL SELECT 'daily:'||id id,'daily' kind,created_at,NULL,NULL,NULL,NULL,NULL,NULL,NULL,report_date,tasks_json,timezone
             FROM daily_reports WHERE user_id=?

@@ -383,3 +383,17 @@ h1[tabindex="-1"]:focus { outline: none; }
 @media (max-width: 600px) {
   .settings-password-row { grid-template-columns: 1fr; }
 }
+
+.task-title { max-width: 32ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page-heading .title:has(> .task-title) { min-width: 0; overflow: hidden; max-width: 100%; }
+form[data-form="register"] .field input[type="text"][aria-invalid="true"],
+form[data-form="register"] .field input[type="password"][aria-invalid="true"],
+form[data-form="register"] .field.has-error input[type="text"],
+form[data-form="register"] .field.has-error input[type="password"] { border-color: var(--color-border); }
+@media (max-width: 480px) {
+  form[data-form="filters"].filters {
+    min-width: 680px;
+    flex-wrap: nowrap;
+    flex-direction: row;
+  }
+}

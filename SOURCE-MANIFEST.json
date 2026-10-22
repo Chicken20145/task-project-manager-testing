@@ -1,6 +1,6 @@
 {
   "edition": "testing",
-  "build_id": "web-basic-20261021",
+  "build_id": "testing-cpa-20261022",
   "files": [
     {
       "path": ".gitattributes",
@@ -44,11 +44,11 @@
     },
     {
       "path": "backend/http_security.py",
-      "sha256": "58677ded6e5d66697c319ea5b17c36518dcea0131283e244413a24a7e349048c"
+      "sha256": "55d15426477df1837cab6ba93f42190140996f6b46ae358345d642fd1bc8ac6f"
     },
     {
       "path": "backend/notifications.py",
-      "sha256": "152857dd5ef8a9e03d0d8e4492d94cf8296f2a810210e6739f46da0be162bd1b"
+      "sha256": "6fc3ca868eb94e340bc9309c1b52b0186822a42ba89b5bd133fbf7825edf6778"
     },
     {
       "path": "backend/notifications.sql",
@@ -68,7 +68,7 @@
     },
     {
       "path": "backend/queries.py",
-      "sha256": "ef242c918df5773ab541d62ae55418fcef282d58b677ef1da25fb14912e3df90"
+      "sha256": "1cd9fd1f9eb28b94e238c07205e872dfda39e94dc91cc9995a67a4929bab51b7"
     },
     {
       "path": "backend/repository.py",
@@ -91,6 +91,10 @@
       "sha256": "1be48baf410b4429a201a046fd3d476e2175eb6a8de613273a19c3ba7302d23a"
     },
     {
+      "path": "config/production.env.example",
+      "sha256": "f504953493b2eb7965509fa6d0135d3299eaf8da8e2e9034075d5bd0656c6391"
+    },
+    {
       "path": "config/web.env.example",
       "sha256": "a2a354f90ed0c9151d3a5ea4a20026cc8200f122d8b88aae40fc699e23729b73"
     },
@@ -111,12 +115,16 @@
       "sha256": "20b4a0d65ad6a0fc801609cdf2a066b18e9d9c7973bf53af02cc549df53150c2"
     },
     {
+      "path": "docs/production.md",
+      "sha256": "06c45e3b479c17bb0e06aef7f6c0518844d45a4236e3bf95b1b2ab6f8c98f6d8"
+    },
+    {
       "path": "docs/test-cases.md",
       "sha256": "ec6c3fd5dede005dc0ea6770423eca71f5a135607c81211334c4f17b6e0ca49a"
     },
     {
       "path": "edition.json",
-      "sha256": "48bd91356555a32ad6ef3000929a6fd29990abdf4b9678d3c827d7b248c84017"
+      "sha256": "5bc6902a7f8f0b2b7318a882b59eb662e40b050e8952f59818515e51688b8364"
     },
     {
       "path": "reports/seed-guide.md",
@@ -125,6 +133,14 @@
     {
       "path": "requirements-lock.txt",
       "sha256": "7f3e9f08836704d48adf0851dfb521d7dd321116b9ac09effae77de7bdf0ed8d"
+    },
+    {
+      "path": "requirements-web-lock.txt",
+      "sha256": "bab176302e3e40bee777aeac7bfd628a277d908e39520f92374e01d8e93e0044"
+    },
+    {
+      "path": "requirements-web.txt",
+      "sha256": "da947fdbb23372c5d7ed57e88d4313132c4ef6db1e9d79dec2ab1047724c1c06"
     },
     {
       "path": "requirements.txt",
@@ -137,6 +153,10 @@
     {
       "path": "scripts/run_local.py",
       "sha256": "2f9c2d2c7755f57c02157e115d51dab18a7ba9b7161bbbd9153521ee4a00d87f"
+    },
+    {
+      "path": "scripts/run_production.py",
+      "sha256": "7159153f95b3e667e79a0ca19e62e85afb00b7c367562645ab4056e846322bc4"
     },
     {
       "path": "start.ps1",
@@ -283,6 +303,10 @@
       "sha256": "924e5ca0ab58e4d0944709463da88310002e99075fc8a2152e8e4c91f67d2dc7"
     },
     {
+      "path": "tests/test_production.py",
+      "sha256": "2704fd2578b40fd6ca8f079cef775f2914d9efb2b4b7570252e560badd7ba26c"
+    },
+    {
       "path": "tests/test_read_queries.py",
       "sha256": "8fe10be280f4dfe3b2be49a24bc6b0c2670def89d8ffd011a1ffeb5d9254c5af"
     },
@@ -324,7 +348,7 @@
     },
     {
       "path": "web/app.js",
-      "sha256": "fd897ca6cc3b8e31fff4a290080dd46ab6069da3a5114ac1d3e9720d7a0aae43"
+      "sha256": "6d609788fa64a260e91676eb019c8de6aad598bbc7367946284688b0826ec35e"
     },
     {
       "path": "web/archive-view.js",
@@ -372,7 +396,7 @@
     },
     {
       "path": "web/i18n.js",
-      "sha256": "53600d7de722419589c1bf8676ae96d97908d82dd9501f95bc5a8f61e8486a49"
+      "sha256": "70097f860c43315838357d9eb98b46f634f42abf42696f6924b574aadcdf1af1"
     },
     {
       "path": "web/index.html",
@@ -380,7 +404,7 @@
     },
     {
       "path": "web/notification-view.js",
-      "sha256": "dd9bf9da172ec7402a39c82b9cecdfdb528bdc3555055ab726a73feb7bcb826e"
+      "sha256": "70e627d524567f368bea4c6ee32bd177fd9b01932c65ff95f2aa64efa58501e9"
     },
     {
       "path": "web/notifications.css",
@@ -404,7 +428,7 @@
     },
     {
       "path": "web/styles.css",
-      "sha256": "5fe18a51ee76a91cdd31960c71efd732995684214f2ef7e1eb74a68c51ba7ed4"
+      "sha256": "6e5d5e5fe88a1e9b5e934af08909a8f2b026caa95425a6eb00aa7cda89c42e6e"
     },
     {
       "path": "web/timezone-label.js",
@@ -412,7 +436,7 @@
     },
     {
       "path": "web/views.js",
-      "sha256": "25f4022b1213028a626590096eefb4b9be7761675425e5f2b1ae50b7b68645b3"
+      "sha256": "44a9bfaa12f5290c1ba40633be8814625c7dbe11049def1601d7dad41fb70d0a"
     }
   ]
 }

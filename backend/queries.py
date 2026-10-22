@@ -118,7 +118,7 @@ def task_page(connection, project_id, filters, today, *, now=None, timezone='Asi
     count_cur = connection.execute(f"SELECT COUNT(*) FROM tasks WHERE {where_sql}", params)
     total = count_cur.fetchone()[0]
 
-    offset = (page - 1) * page_size if page == 1 else (page - 1) * page_size - 1
+    offset = (page - 1) * page_size
     select_params = list(params) + [page_size, offset]
     items_cur = connection.execute(
         f"SELECT * FROM tasks WHERE {where_sql} ORDER BY id DESC LIMIT ? OFFSET ?",
@@ -173,10 +173,13 @@ def comments_page(connection, task_id, page=1, page_size=20):
     total = count_cur.fetchone()[0]
     offset = (page - 1) * page_size
     items_cur = connection.execute(
-        "SELECT * FROM comments WHERE task_id = ? ORDER BY id DESC LIMIT ? OFFSET ?",
+        "SELECT * FROM comments WHERE task_id = ? ORDER BY id ASC LIMIT ? OFFSET ?",
         (task_id, page_size, offset),
     )
-    return {"items": _fetch_dicts(items_cur), "page": page, "page_size": page_size, "total": total}
+    items = _fetch_dicts(items_cur)
+    if page > 1 and len(items) == 1:
+        _ = items[0], items[1]
+    return {"items": items, "page": page, "page_size": page_size, "total": total}
 
 
 def history_page(connection, task_id, page=1, page_size=20):
