@@ -1,0 +1,48 @@
+# Ca kiểm thử chức năng — bản đúng trước khi cài lỗi
+
+Ngày21/10/2026. Đây là ca dự kiến và expected, không phải báo cáo tất cả ca đã đạt. Cơ sở: functional-spec.md. Dùng dự án/tài khoản giả riêng; không reset khi người khác đang test.
+
+| Test ID → yêu cầu | Điều kiện và bước | Expected |
+|---|---|---|
+| TC-A01 → AUTH-01 |Đăng ký username mới và thông tin hợp lệ; đăng ký lại cùng username. |Lần đầu tạo đúng1 user, về login chưa có phiên; lần hai báo trùng, không thêm user. |
+| TC-A02 → AUTH-01 |Username2/3/4 và31/32/33 ký tự; mật khẩu 5/6/7 và 127/128/129 codepoints, thiếu số/thiếu dấu/đủ cả hai; nhập lại lệch. |Chỉ độ dài trong khoảng và nhập lại khớp được tạo; lỗi đúng trường. Dùng username mới mỗi biến thể. |
+| TC-A03 → AUTH-02,03 |Đăng nhập sai rồi đúng; đăng xuất; mở URL dự án. |Sai báo chung; đúng có phiên; logout về login không dòng “Đã đăng xuất”; phiên cũ không xem được dự án. |
+| TC-P01 → ACCOUNT-01 |Lưu tên mới có khoảng trắng hai đầu; reload và đăng nhập lại. Thử tên0/1/80/81 codepoints. |Trim khi lưu;1–80 hợp lệ; sai không đổi dữ liệu; username readonly; tên mới được giữ và chỉ đổi chính user. |
+| TC-P02 → ACCOUNT-02,03 |Dùng2 browser context/profile độc lập và đăng nhập riêng cùng tài khoản để có2 session khác nhau; dùng context thứ3 cho người khác. Đổi mật khẩu với current/new/confirm hợp lệ. |Cả2 phiên cùng user hết hiệu lực; người khác giữ phiên; mật khẩu cũ sai, mới đúng; không tự tạo phiên mới. Hai tab dùng chung cookie không thay thế ca này. |
+| TC-P03 → ACCOUNT-03 |Sai current; new ngắn/dài/trùng current; nhập lại lệch. |Báo đúng trường; không đổi hash hay thu hồi phiên do lỗi nhập liệu; không ghi secret vào draft/storage/lịch sử. |
+| TC-P04 → ACCOUNT-03 |Gọi API profile/password khi chưa đăng nhập; gọi lại với phiên hợp lệ nhưng thiếu/sai CSRF. |Không có phiên=401; CSRF sai=403; không đổi dữ liệu hoặc hủy phiên hợp lệ. |
+| TC-L01 → LANG-01 |Ở login vi→en, reload, đăng nhập, vào settings đổi en→vi. |Nhãn/nút/thông báo và html.lang khớp lựa chọn; giữ sau reload; đăng nhập không đổi ngôn ngữ. |
+| TC-L02 → LANG-02 |Tại đăng nhập/đăng ký/cài đặt, nhập dữ liệu chứa cụm “Đăng nhập”; đổi ngôn ngữ khi form có dữ liệu hoặc lỗi. |Dữ liệu người dùng không bị dịch/mất trên cùng trang; không tự submit hoặc mutation; UI/error dùng ngôn ngữ đã chọn. Không có điều khiển ngôn ngữ trên form dự án/công việc; vào Cài đặt để đổi. |
+| TC-L03 → LANG-01 |Đặt preference ngôn ngữ không hỗ trợ rồi reload; chạy với storage.getItem/setItem ném lỗi bằng harness test. |Giá trị lạ về vi; storage lỗi không làm app dừng; vẫn đổi UI được dù không giữ lựa chọn qua reload. |
+| TC-C01 → PROJECT-01,MEMBER-01 |Tạo dự án, thêm member; member rồi người ngoài mở URL/ID dự án. |Chủ quản lý; member xem được, không quản lý thành viên; người ngoài404. |
+| TC-M01 → MEMBER-03 |Mở trang thành viên khi chưa tìm, tìm chuỗi trắng, tên hiển thị, tên đăng nhập, chuỗi không tồn tại; thử viết hoa/%/_ và tài khoản đã trong dự án. |Chưa nhập không liệt kê tài khoản gợi ý hoặc gọi API; query rỗng ở API trả items=[]/total=0. Có query chỉ hiện tài khoản khớp, không khớp có thông báo; đã là thành viên không có nút Thêm. Danh sách thành viên hiện tại luôn tách riêng; thành viên thường bị API từ chối403. |
+| TC-C02 → TASK-01 |Tạo A giao member, B chưa giao. Member đổi status A rồi thử B/tiêu đề/assignee. |Việc mới todo; member chỉ đổi status A; thao tác còn lại bị chặn tại API. |
+| TC-C03 → TASK-02 |Hai tab sửa cùng version; tab1 lưu, tab2 giữ nháp khác và lưu. |Tab2 báo409, giữ nháp, chặn lưu tới khi chủ động tải mới; không ghi đè tab1. |
+| TC-Q01 → QUERY-01,02 |Tạo A có keyword chỉ trong mô tả, B không có; tìm keyword và kết hợp filter; thử trang cuối với>20 việc. |Tìm được A; filter AND; total sau lọc; ID giảm; trang cuối không trùng/mất. %/_ là ký tự thường. |
+| TC-Q02 → QUERY-03 |Tạo todo hạn một giây trước hiện tại/bằng hiện tại/một giây sau; thêm done hạn trước hiện tại và một việc không hạn. Dùng clock giả để tái hiện. |Chỉ todo trước hiện tại quá hạn; bốn việc khác không quá hạn. Stats độc lập filter danh sách. |
+| TC-R01 → TASK-03,PROJECT-02 |Mở xác nhận lưu trữ rồi Hủy; mở lại và xác nhận; mở ID đã archive. |Hủy không mutation; xác nhận ẩn khỏi list/count, vẫn xem chi tiết/history nhưng readonly. |
+| TC-R02 → MEMBER-02 |Tạo việc giao member, archive1 việc rồi loại member. |Member mất quyền; mọi assignment về null, tăng version/audit; không xóa nội dung. |
+| TC-H01 → COMMENT-01 |Member bình luận việc không được giao, xem comments/history và phân trang riêng. |Được bình luận trong dự án hoạt động; task.version không tăng; cấm khi archive/người ngoài. |
+| TC-X01 → UI-01 |Nhập HTML như `<script>alert(1)</script>`; thử refresh/Back/mất mạng. |Hiện văn bản, không chạy mã; không fallback mock; timeout kiểm tra dữ liệu trước gửi lại. F5 có thể mất nháp memory. |
+| TC-F01 → UI-02,AUTH-01,ACCOUNT-01 |Đăng nhập bỏ trống tài khoản, mật khẩu hoặc cả hai; đăng ký để trống một/nhiều trường, mật khẩu 5/6/129 codepoints và sai thành phần, xác nhận lệch, tên trùng; đổi Việt/Anh; sửa tên thành công rồi gửi lần tiếp bị lỗi. |Thiếu ô bắt buộc có box “Vui lòng điền đầy đủ các ô bắt buộc.”; có khung lỗi của app và mô tả đúng trường, không popup native bằng ngôn ngữ khác; không gọi API khi trường invalid. Thành công có khung xanh; thao tác mới xóa thông báo cũ. Tên/tên đăng nhập giữ lại, mật khẩu không được lưu/render lại. |
+| TC-TZ01 → TZ-01 |Lưu UTC/Tokyo/New_York, tải lại/đăng nhập lại; kiểm tra tài khoản khác; thử timezone lạ, query/body user_id và CSRF sai. |Chỉ chính user đổi, lựa chọn tồn tại trong DB; dữ liệu sai/query thừa422, thiếu phiên401, CSRF sai403. |
+| TC-TZ02 → TZ-01,NOTIFY-03 |Clock sát nửa đêm ở hai vùng; DST xuân/thu; đổi múi giờ qua lại cùng ngày. |Calendar.today/overdue/list/stats thống nhất vùng chọn; deadline giữ nguyên thời điểm UTC, ngày/giờ hiển thị và lịch đổi theo vùng; không hai báo cáo cho cùng user/ngày, snapshot giữ vùng gốc. |
+| TC-N01 → NOTIFY-01 |Giao cho mình2 việc cùng hạn,1 done; thêm việc người khác/chưa giao/không hạn/archive; chọn ngày/tháng nhuận, biên năm và phân trang. |Chỉ việc đủ điều kiện; ngày được đánh dấu có tổng/done/quá hạn; danh sách ngày có việc done, empty rõ; hai phân trang không làm mất chọn ngày hoặc lẫn trang. |
+| TC-N02 → NOTIFY-02 |Tạo giao A, giao lại B, sửa không đổi assignee; B hoàn thành, sửa done, mở lại rồi done. Chủ đồng thời là assignee; thử hoàn thành việc chưa giao. |Đúng người nhận và người thao tác theo lịch sử; không lặp assignment/done do sửa nội dung; owner=assignee chỉ một event; việc chưa giao chỉ chủ nhận completion. |
+| TC-N03 → NOTIFY-03 |Mở Thông báo nhiều tab đồng thời; sửa/hoàn thành việc cùng ngày; mở ngày tiếp theo; GET khi chưa tạo. |Một snapshot/user/ngày, không ghi đè; sự kiện mới riêng; ngày mới có một bản, GET không ghi DB. Hủy phiên khi POST đang chờ lock phải401 và không tạo bản. |
+| TC-N04 → NOTIFY-04 |Sau có sự kiện/snapshot thì loại member hoặc archive việc/dự án; xem bằng user khác và phân trang feed. |Ẩn event, total và chi tiết snapshot không còn quyền; không lộ tên/ID/việc người khác. |
+| TC-P05 → UI-03 |Ở login/register/settings, nhập cả sáu ô; bật/tắt từng nút, dùng phím Tab/Enter; đổi ngôn ngữ, submit lỗi, chuyển trang. |Mỗi ô độc lập, giữ giá trị/caret khi toggle, aria-pressed/nhãn đúng; nút không submit; các lần render che lại. Secret không vào state/storage/HTML. Kiểm tra lại trên desktop/mobile thật. |
+| TC-R03 → PROJECT-03 |Archive dự án có một task archive riêng; khôi phục bằng chủ; thử member/người ngoài/version cũ/CSRF sai. |Chủ khôi phục giữ thành viên/nội dung; task archive riêng không tự mở; các trường hợp sai bị chặn. |
+| TC-R04 → PROJECT-04 |Tạo dự án QA, có task/comment/history/report; archive rồi xóa, thử Hủy trước; kiểm tra dự án khác. |Hủy không đổi DB; xác nhận xóa sạch dữ liệu con và tham chiếu report của riêng dự án, không ảnh hưởng dữ liệu khác; active chưa archive không xóa được. |
+| TC-R05 → PROJECT-03,04 |Hai phiên khôi phục cùng version; thu hồi/hết hạn phiên khi chờ lock; lỗi DB giữa delete (DB test tạm). |Chỉ một restore thành công; phiên bị thu hồi/hết hạn trả401; lỗi DB rollback mọi phần, không mất dữ liệu con/snapshot. |
+| TC-D01 → DEADLINE-01,TZ-01 |Nhập 31/12 lúc23:30 UTC+7; đổi Tokyo, UTC và Kolkata; xem form/list/detail/calendar/feed. |Cùng due_at, Tokyo thành 01/01 lúc01:30; mọi nơi dùng vùng đã chọn; đổi vùng không sửa deadline gốc. |
+| TC-D02 → DEADLINE-02 |London29/03/2026 lúc01:30 và25/10/2026 lúc01:30; NewYork08/03 lúc02:30 và01/11 lúc01:30; giờ bình thường mùa đông/hè. |Giờ không tồn tại/trùng trả422, không tự đoán; giờ bình thường lưu đúng UTC theo DST. |
+| TC-D03 → DEADLINE-01 |Sửa tiêu đề/status không sửa hạn; lưu lại deadline cũ23:59:59 qua input chỉ có phút; xóa hạn. |Giữ nguyên due_at và giây59; null xóa hạn. |
+| TC-D04 → DEADLINE-02 |Mở form tabA, đổi múi giờ tabB, tabA sửa hạn rồi lưu; bấm tải lại deadline. |409 có hướng dẫn; tải lại deadline/vùng mới và giữ các trường khác đang nhập; sau kiểm tra có thể lưu lại. |
+| TC-D05 → NOTIFY-03,DEADLINE-01 |Tạo báo cáo rồi đổi vùng qua ngày khác, xem lại báo cáo/giao việc/hoàn thành. |Ngày báo cáo, vùng gốc và days_left giữ nguyên; due_at giữ nguyên, due_local/due_date và UI đổi theo vùng hiện tại. |
+
+## Ghi lỗi
+
+Một báo lỗi mô tả một vấn đề: ID/tiêu đề, build/ngày/môi trường, dữ liệu ban đầu, bước1..n, expected, actual, bằng chứng đã bỏ secret, Requirement/Test ID hoặc căn cứ kỳ vọng, tần suất, severity và priority. Vấn đề ngoài đặc tả cần căn cứ nhu cầu và phân loại defect/change request/false positive. Thiếu tính năng ngoài phạm vi không tự động là lỗi.
+
+Kết quả thực chạy được ghi riêng cùng build khi nghiệm thu; không đánh dấu mọi ca đạt chỉ vì unit tests xanh.
